@@ -12,12 +12,10 @@ inputs:
   github_summary:
     description: 'Enable GitHub summary output'
     required: false
-    type: boolean
     default: 'false'
   path_prefix:
     description: 'Directory location containing project code'
     required: false
-    type: string
     default: '.'
 
 outputs:
