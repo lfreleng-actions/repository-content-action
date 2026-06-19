@@ -32,7 +32,7 @@ outputs:
   maven_config:
     description: 'Repository contains Maven project with file: pom.xml'
     value: "${{ steps.content.outputs.maven_config }}"
-  gradel_config:
+  gradle_config:
     description: 'Repository contains Gradle project with file(s): settings.gradle*'
     value: "${{ steps.content.outputs.gradle_config }}"
   tox_config:
