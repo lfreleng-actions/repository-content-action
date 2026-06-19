@@ -32,7 +32,7 @@ outputs:
   maven_config:
     description: 'Repository contains Maven project with file: pom.xml'
     value: "${{ steps.content.outputs.maven_config }}"
-  gradel_config:
+  gradle_config:
     description: 'Repository contains Gradle project with file(s): settings.gradle*'
     value: "${{ steps.content.outputs.gradle_config }}"
   tox_config:
@@ -56,24 +56,32 @@ runs:
   steps:
     - name: 'Check path_prefix is valid directory path'
       shell: bash
+      env:
+        PATH_PREFIX: ${{ inputs.path_prefix }}
       run: |
         # Check path_prefix is valid directory path
-        if [ ! -d "${{ inputs.path_prefix }}" ]; then
+        if [ ! -d "$PATH_PREFIX" ]; then
           echo 'Error: invalid path/prefix to project directory ❌'; exit 1
         fi
 
     - name: 'Check repository content'
       id: content
       shell: bash
+      env:
+        PATH_PREFIX: ${{ inputs.path_prefix }}
       run: |
         # Check repository content
 
-        echo "Checking repository content in: '${{ inputs.path_prefix }}'"
-        cd "${{ inputs.path_prefix }}"
+        echo "Checking repository content in: '$PATH_PREFIX'"
+        cd -- "$PATH_PREFIX" || {
+          echo "Error: failed to change directory to '$PATH_PREFIX' ❌"; exit 1
+        }
 
         # Always create a local text file containing the summary output
-        tmpfile=$(mktemp -p /tmp --suffix "github-summary-output.txt")
-        echo "tmpfile=$tmpfile" >> "$GITHUB_ENV"
+        tmpfile=$(mktemp -p /tmp --suffix "github-summary-output.txt") || {
+          echo 'Error: failed to create temporary summary file ❌'; exit 1
+        }
+        echo "tmpfile=$tmpfile" >> "$GITHUB_OUTPUT"
         # Check for Python project metadata files
         if [ -f pyproject.toml ] || [ -f setup.py ] || \
           [ -f Pipfile ] || [ -f requirements.txt ]; then
@@ -181,10 +189,16 @@ runs:
     - name: 'GitHub Summary Output'
       if: ${{ inputs.github_summary == 'true' }}
       shell: bash
+      env:
+        TMPFILE: ${{ steps.content.outputs.tmpfile }}
       run: |
-        cat "$tmpfile"  >> "$GITHUB_STEP_SUMMARY"
+        cat -- "$TMPFILE"  >> "$GITHUB_STEP_SUMMARY"
 
     - name: 'Remove temporary report/file'
       shell: bash
+      env:
+        TMPFILE: ${{ steps.content.outputs.tmpfile }}
       run: |
-        rm "${{ env.tmpfile }}"
+        if [ -n "$TMPFILE" ]; then
+          rm -f -- "$TMPFILE"
+        fi

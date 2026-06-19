@@ -44,7 +44,7 @@ steps:
 | go_project        | Found a Go project with file: go.mod                  |
 | node_js_project   | Found a Node.js project with file: package.json       |
 | maven_config      | Found a Maven project with file: pom.xml              |
-| gradel_config     | Found a Gradle project with file(s): settings.gradle* |
+| gradle_config     | Found a Gradle project with file(s): settings.gradle* |
 | tox_config        | Found a TOX configuration file: tox.ini               |
 | jupyter_notebooks | Found Jupyter Notebooks with file(s): *.ipynb         |
 | makefile          | Found a Makefile                                      |
