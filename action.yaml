@@ -73,10 +73,14 @@ runs:
         # Check repository content
 
         echo "Checking repository content in: '$PATH_PREFIX'"
-        cd "$PATH_PREFIX"
+        cd -- "$PATH_PREFIX" || {
+          echo "Error: failed to change directory to '$PATH_PREFIX' ❌"; exit 1
+        }
 
         # Always create a local text file containing the summary output
-        tmpfile=$(mktemp -p /tmp --suffix "github-summary-output.txt")
+        tmpfile=$(mktemp -p /tmp --suffix "github-summary-output.txt") || {
+          echo 'Error: failed to create temporary summary file ❌'; exit 1
+        }
         echo "tmpfile=$tmpfile" >> "$GITHUB_OUTPUT"
         # Check for Python project metadata files
         if [ -f pyproject.toml ] || [ -f setup.py ] || \
@@ -188,11 +192,13 @@ runs:
       env:
         TMPFILE: ${{ steps.content.outputs.tmpfile }}
       run: |
-        cat "$TMPFILE"  >> "$GITHUB_STEP_SUMMARY"
+        cat -- "$TMPFILE"  >> "$GITHUB_STEP_SUMMARY"
 
     - name: 'Remove temporary report/file'
       shell: bash
       env:
         TMPFILE: ${{ steps.content.outputs.tmpfile }}
       run: |
-        rm "$TMPFILE"
+        if [ -n "$TMPFILE" ]; then
+          rm -f -- "$TMPFILE"
+        fi
