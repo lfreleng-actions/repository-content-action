@@ -49,7 +49,7 @@ jobs:
       # Test local action
       - name: "Run action: ${{ github.repository }}"
         id: testing
-        uses: ./
+        uses: $/
         with:
           path_prefix: "test-python-project"
           github_summary: true
